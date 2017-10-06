@@ -81,12 +81,23 @@
 (define (finalize-script s)
   (recursive-list->vector s))
 
-
 ;; Just a test
-(define (add-block-test scratchproj)
+;; Adding functions will have the syntax (defun asdf f)
+;; Where f takes two args and passes then down to get added to script and info
+(define (change-scriptcount scratchproj n)
+  (cons 'info (let ((info (cdr (assoc 'info scratchproj))))
+		(map (lambda (p) (if (string= (symbol->string (car p)) "scriptCount")
+				(cons (car p) (+ n (cdr p)))
+				p))
+		     info))))
+		    
+(define (append-script scratchproj script)
   (let ((scripts (assoc 'scripts (children scratchproj))))
     (cons 'scripts
-	  (recursive-list->vector
-	   (cdr
-	    (append scripts (list (script 10 10 (block "whenGreenFlag") (block "forward: " 10)))))))))
+	   (recursive-list->vector
+	    (cdr
+	     (append scripts (list script)))))))
 
+(define (add-block-test scratchproj)
+  (list (append-script scratchproj (script 10 10 (block "whenGreenFlag") (block "forward: " 10)))
+	(change-scriptcount scratchproj 1)))
